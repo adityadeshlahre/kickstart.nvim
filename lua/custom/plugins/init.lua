@@ -63,16 +63,21 @@ return {
       null_ls.setup {
         sources = {
           null_ls.builtins.formatting.prettier.with {
-            filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'json', 'markdown' },
-            command = 'node_modules/.bin/prettier',
+            filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'json', 'markdown', 'yaml' },
+            -- command = 'node_modules/.bin/prettier',
             -- extra_args = { '--single-quote', '--jsx-single-quote' },
           },
-          null_ls.builtins.diagnostics.eslint_d,
-          null_ls.builtins.code_actions.eslint_d,
+          null_ls.builtins.formatting.black.with {
+            extra_args = { '--line-length=120', '--skip-string-normalization' },
+          },
+          null_ls.builtins.formatting.isort,
+          -- null_ls.builtins.diagnostics.eslint_d,
+          -- null_ls.builtins.code_actions.eslint_d,
           null_ls.builtins.formatting.stylua.with {
             filetypes = { 'lua' },
           },
           -- null_ls.builtins.diagnostics.shellcheck,
+          null_ls.builtins.formatting.goimports,
         },
       }
     end,
