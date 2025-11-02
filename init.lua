@@ -93,6 +93,10 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+-- neo-void specific settings
+vim.g.neovide_opacity = 0.8
+vim.g.neovide_normal_opacity = 1.0
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -176,18 +180,15 @@ vim.o.wrap = false
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.keymap.set('n', '<leader>ft', '<cmd>FloatermToggle<CR>', { desc = 'Toggle floating terminal' })
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open diagnostic [E]rror' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Next diagnostic' })
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Previous diagnostic' })
-vim.keymap.set('n', ']e', function()
-  vim.diagnostic.goto_next { severity = vim.diagnostic.severity.ERROR }
-end, { desc = 'Next error' })
-vim.keymap.set('n', '[e', function()
-  vim.diagnostic.goto_prev { severity = vim.diagnostic.severity.ERROR }
-end, { desc = 'Previous error' })
+vim.keymap.set('n', ']e', function() vim.diagnostic.goto_next { severity = vim.diagnostic.severity.ERROR } end, { desc = 'Next error' })
+vim.keymap.set('n', '[e', function() vim.diagnostic.goto_prev { severity = vim.diagnostic.severity.ERROR } end, { desc = 'Previous error' })
 vim.keymap.set('n', '<leader>td', '<cmd>Telescope diagnostics bufnr=0<CR>', {
   desc = 'Show buffer diagnostics (Telescope)',
 })
@@ -351,7 +352,7 @@ require('lazy').setup({
   -- Then, because we use the `opts` key (recommended), the configuration runs
   -- after the plugin has been loaded as `require(MODULE).setup(opts)`.
 
-  {                     -- Useful plugin to show you pending keybinds.
+  { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     ---@module 'which-key'
@@ -400,10 +401,10 @@ require('lazy').setup({
 
       -- Document existing key chains
       spec = {
-        { '<leader>s', group = '[S]earch',    mode = { 'n', 'v' } },
+        { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk',  mode = { 'n', 'v' } },
-        { 'gr',        group = 'LSP Actions', mode = { 'n' } },
+        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { 'gr', group = 'LSP Actions', mode = { 'n' } },
       },
     },
   },
@@ -434,7 +435,7 @@ require('lazy').setup({
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -496,25 +497,81 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       -- vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>sf', function()
-        builtin.find_files {
-          find_command = { 'rg', '--files', '--hidden', '--glob', '!.git/**', '--glob', '!node_modules/**', '--glob', '!.dist/*' },
-        }
-      end, { desc = '[S]earch [F]iles' })
+      vim.keymap.set(
+        'n',
+        '<leader>sf',
+        function()
+          builtin.find_files {
+            find_command = {
+              'rg',
+              '--files',
+              '--hidden',
+              '--glob',
+              '!.git/**',
+              '--glob',
+              '!node_modules/**',
+              '--glob',
+              '!.dist/*',
+              '--glob',
+              '!*.lock',
+              '--glob',
+              '!.nx/**',
+              '--glob',
+              '!.next/**',
+              '--glob',
+              '!yarn.lock',
+            },
+          }
+        end,
+        { desc = '[S]earch [F]iles' }
+      )
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set({ 'n', 'v' }, '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', function()
         builtin.live_grep {
           additional_args = function()
             return {
+              '--no-ignore',
               '--glob',
               '!**/node_modules/*',
               '--glob',
               '!**/.git/*',
               '--glob',
               '!**/dist/*',
+              '--glob',
+              '!**/.next/*',
+              '--glob',
+              '!**/yarn.lock',
+              '--glob',
+              '!**/package-lock.json',
+              '--glob',
+              '!**/pnpm-lock.yaml',
+              '--glob',
+              '!**/tags',
+              '--glob',
+              '!bun.lockb',
+              '--glob',
+              '!bun.lock',
+              '--glob',
+              '!**/.DS_Store',
             }
           end,
+          -- vimgrep_arguments = {
+          --   'rg',
+          --   '--color=never',
+          --   '--no-heading',
+          --   '--with-filename',
+          --   '--line-number',
+          --   '--column',
+          --   '--smart-case',
+          --   '--no-ignore',
+          --   '--glob',
+          --   '!**/node_modules/*',
+          --   '--glob',
+          --   '!**/.git/*',
+          --   '--glob',
+          --   '!**/dist/*',
+          -- },
         }
       end, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
@@ -535,24 +592,17 @@ require('lazy').setup({
 
       -- It's also possible to pass additional configuration options.
       --  See `:help telescope.builtin.live_grep()` for information about particular keys
-      vim.keymap.set(
-        'n',
-        '<leader>s/',
-        function()
-          builtin.live_grep {
-            grep_open_files = true,
-            prompt_title = 'Live Grep in Open Files',
-            additional_args = function()
-              return { '--glob', '!**/node_modules/*' }
-            end,
-          }
-        end,
-        { desc = '[S]earch [/] in Open Files' }
-      )
+      vim.keymap.set('n', '<leader>s/', function()
+        builtin.live_grep {
+          grep_open_files = true,
+          prompt_title = 'Live Grep in Open Files',
+          additional_args = function() return { '--glob', '!**/node_modules/*' } end,
+        }
+      end, { desc = '[S]earch [/] in Open Files' })
 
       -- Shortcut for searching your Neovim configuration files
-      vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end,
-        { desc = '[S]earch [N]eovim files' })
+      vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
+      vim.keymap.set('n', '<leader>ls', require('auto-session').search, { desc = '[S]earch [S]essions' })
     end,
   },
 
@@ -676,8 +726,7 @@ require('lazy').setup({
           map('grt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
 
           -- Toggle to show/hide diagnostic messages
-          map('<leader>td', function() vim.diagnostic.enable(not vim.diagnostic.is_enabled()) end,
-            '[T]oggle [D]iagnostics')
+          map('<leader>td', function() vim.diagnostic.enable(not vim.diagnostic.is_enabled()) end, '[T]oggle [D]iagnostics')
 
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
@@ -713,9 +762,7 @@ require('lazy').setup({
           --
           -- This may be unwanted, since they displace some of your code
           if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
-            map('<leader>th',
-              function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end,
-              '[T]oggle Inlay [H]ints')
+            map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, '[T]oggle Inlay [H]ints')
           end
         end,
       })
@@ -725,6 +772,7 @@ require('lazy').setup({
       vim.diagnostic.config {
         severity_sort = true,
         float = { border = 'rounded', source = 'if_many' },
+        underline = { severity = vim.diagnostic.severity.ERROR },
         signs = vim.g.have_nerd_font and {
           text = {
             [vim.diagnostic.severity.ERROR] = '󰅚 ',
@@ -804,7 +852,7 @@ require('lazy').setup({
         },
         -- This table contains config for all language servers that are *not* installed via Mason.
         -- Structure is identical to the mason table from above.
-        others == {
+        others = {
           -- dartls = {},
         },
       }
@@ -824,7 +872,29 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers.mason or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
+        -- lsp servers
+        'ts_ls',
+        'jdtls',
+        'golangci_lint_ls',
+        'eslint',
+        'docker_compose_language_service',
+        'docker_language_server',
+        'dockerls',
+        'gopls',
+        'pyright',
+        'tailwindcss',
+
+        -- formatters linters debuggers
+        'isort',
+        'black',
+        'eslint_d',
+        'biome',
+        'checkstyle',
+        'golangci-lint',
+        'goimports',
+        'prettierd',
+        'stylua',
+        'delve',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -839,7 +909,7 @@ require('lazy').setup({
 
       -- After configuring our language servers, we now enable them
       require('mason-lspconfig').setup {
-        ensure_installed = {},   -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
+        ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_enable = true, -- automatically run vim.lsp.enable() for all servers that are installed via Mason
       }
 
@@ -1022,13 +1092,6 @@ require('lazy').setup({
     config = function()
       require('auto-session').setup {
         auto_session_suppress_dirs = { '~/', '~/Projects', '~/Downloads', '/tmp' },
-        session_lens = {
-          buffer_to_ignore = {},
-          load_on_setup = true,
-          theme_conf = { border = true },
-          previewer = false,
-        },
-        vim.keymap.set('n', '<leader>ls', require('auto-session.session-lens').search_session, { desc = 'Search Session', noremap = true }),
       }
     end,
   },
@@ -1074,7 +1137,6 @@ require('lazy').setup({
     ---@diagnostic disable-next-line: missing-fields
     opts = { signs = false },
   },
-
   { -- Collection of various small independent plugins/modules
     'nvim-mini/mini.nvim',
     config = function()
@@ -1170,6 +1232,7 @@ require('lazy').setup({
   require 'custom.plugins.tailwind',
   require 'custom.plugins.surround',
   require 'custom.plugins.lazygit',
+  require 'custom.plugins.floatterm',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
