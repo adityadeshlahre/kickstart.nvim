@@ -2,8 +2,9 @@
 --  I promise not to create any merge conflicts in this directory :)
 --
 -- See the kickstart.nvim README for more information
--- return {}
-
+--
+---@module 'lazy'
+---@type LazySpec
 return {
   {
     'folke/noice.nvim',
