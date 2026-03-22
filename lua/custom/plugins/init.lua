@@ -6,6 +6,7 @@
 ---@module 'lazy'
 ---@type LazySpec
 return {
+  -- Noice.nvim - Better UI for messages and notifications
   {
     'folke/noice.nvim',
     event = 'VeryLazy',
@@ -41,6 +42,8 @@ return {
       'rcarriga/nvim-notify',
     },
   },
+
+  -- Inc-rename - Incremental rename with preview
   {
     'smjonas/inc-rename.nvim',
     cmd = 'IncRename',
@@ -56,6 +59,8 @@ return {
     },
     config = true,
   },
+
+  -- Auto-save - Automatically save changes
   {
     'Pocco81/auto-save.nvim',
     event = 'VeryLazy',
@@ -75,4 +80,30 @@ return {
       vim.keymap.set('n', '<leader>ta', ':ASToggle<CR>', { desc = 'Toggle AutoSave' })
     end,
   },
+
+  -- Auto-session - Session management
+  {
+    'rmagatti/auto-session',
+    config = function()
+      require('auto-session').setup {
+        auto_session_suppress_dirs = { '~/', '~/Projects', '~/Downloads', '/tmp' },
+      }
+      vim.keymap.set('n', '<leader>ls', require('auto-session').search, { desc = '[S]earch [S]essions' })
+    end,
+  },
+
+  -- Custom user settings (neovide, wrap, relativenumber)
+  { import = 'custom.plugins.user_settings' },
+
+  -- Custom autocommands (restore cursor, auto-create dir)
+  { import = 'custom.plugins.autocmds' },
+
+  -- Custom keymaps
+  { import = 'custom.plugins.keymaps' },
+
+  -- Custom telescope config
+  { import = 'custom.plugins.telescope' },
+
+  -- Custom LSP config
+  { import = 'custom.plugins.lsp_config' },
 }
