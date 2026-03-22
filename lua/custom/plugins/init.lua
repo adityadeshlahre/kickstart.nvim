@@ -2,7 +2,7 @@
 --  I promise not to create any merge conflicts in this directory :)
 --
 -- See the kickstart.nvim README for more information
---
+
 ---@module 'lazy'
 ---@type LazySpec
 return {
@@ -10,7 +10,6 @@ return {
     'folke/noice.nvim',
     event = 'VeryLazy',
     opts = {
-      -- add any options here
       presets = {
         command_palette = true,
       },
@@ -38,11 +37,7 @@ return {
       },
     },
     dependencies = {
-      -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
       'MunifTanjim/nui.nvim',
-      -- OPTIONAL:
-      --   `nvim-notify` is only needed, if you want to use the notification view.
-      --   If not available, we use `mini` as the fallback
       'rcarriga/nvim-notify',
     },
   },
@@ -62,56 +57,11 @@ return {
     config = true,
   },
   {
-    'nvimtools/none-ls.nvim',
-    config = function()
-      local null_ls = require 'null-ls'
-      null_ls.setup {
-        sources = {
-          null_ls.builtins.formatting.prettier.with {
-            filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'json', 'markdown', 'yaml' },
-            -- command = 'node_modules/.bin/prettier',
-            -- extra_args = { '--single-quote', '--jsx-single-quote' },
-          },
-          null_ls.builtins.formatting.biome.with {
-            prefer_local = 'node_modules/.bin',
-            args = {
-              'check',
-              '--apply-unsafe',
-              '--formatter-enabled=true',
-              '--organize-imports-enabled=true',
-              '--skip-errors',
-              '$FILENAME',
-              '%filepath',
-            },
-          },
-          -- null_ls.builtins.diagnostics.biome.with {
-          --   prefer_local = 'node_modules/.bin',
-          -- },
-          null_ls.builtins.formatting.black.with {
-            extra_args = { '--line-length=120', '--skip-string-normalization' },
-          },
-          null_ls.builtins.formatting.isort,
-          -- null_ls.builtins.diagnostics.eslint_d,
-          -- null_ls.builtins.code_actions.eslint_d,
-          null_ls.builtins.formatting.stylua.with {
-            filetypes = { 'lua' },
-          },
-          -- null_ls.builtins.diagnostics.shellcheck,
-          null_ls.builtins.formatting.goimports,
-          null_ls.builtins.formatting.gofmt,
-          null_ls.builtins.formatting.golines.with {
-            extra_args = { '--max-len=120' },
-          },
-        },
-      }
-    end,
-  },
-  {
     'Pocco81/auto-save.nvim',
     event = 'VeryLazy',
     config = function()
       require('auto-save').setup {
-        enabled = true, -- start auto-save when the plugin is loaded (i.e. on `require('auto-save')`)
+        enabled = true,
         execution_message = {
           message = function() return 'AutoSave: saved at ' .. vim.fn.strftime '%H:%M:%S' end,
           dim = 0.18,
