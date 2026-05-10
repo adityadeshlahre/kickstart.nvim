@@ -195,6 +195,12 @@ do
   vim.keymap.set('v', '<S-Tab>', '<gv', { desc = 'Unindent selected lines' })
   vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move selected lines down' })
   vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move selected lines up' })
+
+  vim.keymap.set('n', 'p', function()
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    vim.cmd 'put'
+    vim.api.nvim_win_set_cursor(0, { row + 1, col })
+  end, { desc = 'Paste below and keep cursor position' })
 end
 
 -- ============================================================
@@ -376,6 +382,13 @@ do
   vim.pack.add { gh 'kdheepak/lazygit.nvim' }
   vim.keymap.set('n', '<leader>lg', '<cmd>LazyGit<cr>', { desc = 'LazyGit' })
 
+  vim.pack.add { gh 'f-person/git-blame.nvim' }
+  require('gitblame').setup {
+    enabled = false,
+    message_template = ' <author> • <date> • <summary> • <<sha>>',
+  }
+  vim.keymap.set('n', '<leader>gb', '<cmd>GitBlameToggle<CR>', { desc = 'Toggle Git [B]lame' })
+
   vim.pack.add { gh 'Pocco81/auto-save.nvim' }
   require('auto-save').setup {
     enabled = true,
@@ -396,6 +409,10 @@ do
     auto_session_suppress_dirs = { '~/', '~/Projects', '~/Downloads', '/tmp' },
   }
   vim.keymap.set('n', '<leader>ls', require('auto-session').search, { desc = '[S]earch [S]essions' })
+
+  vim.pack.add { gh 'MeanderingProgrammer/render-markdown.nvim' }
+  require('render-markdown').setup {}
+  vim.keymap.set('n', '<leader>tm', '<cmd>RenderMarkdown toggle<CR>', { desc = 'Toggle markdown rendering' })
 end
 
 -- ============================================================
@@ -586,6 +603,7 @@ do
   })
 
   local servers = {
+    clangd = {},
     gopls = {},
     pyright = {},
     biome = {},
@@ -632,6 +650,7 @@ do
 
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
+    'clangd',
     'ts_ls',
     'jdtls',
     'golangci_lint_ls',
@@ -749,7 +768,7 @@ end
 do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript', 'yaml', 'typescript', 'go' }
+  local parsers = { 'bash', 'c', 'cpp', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript', 'yaml', 'typescript', 'go' }
   require('nvim-treesitter').install(parsers)
 
   local function treesitter_try_attach(buf, language)
